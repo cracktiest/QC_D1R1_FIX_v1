@@ -20,17 +20,17 @@ const int IR_PIN =D5;
 WiFiClient client;
 TextFinder  finder(client);
 char webtext[25];
-const char* ssid     = "ROBOT V1";
-const char* router   = "ROUTER 1";
+const char* ssid     = "ROBOT V6";
+const char* router   = "ROUTER 6";
 const char* password = "robot%8888";
 const char* host ="10.5.2.222"; //10.5.0.108
 const int port = 80;
 int ulangclient;
-String nama,line,output,good,rework,reject,balance;
-IPAddress local_IP(10,5,4,72);//249
-IPAddress gateway(10,5,1,1);//(10,5,0,30);
+String nama,line,output,good,rework,reject,balance,good_rework,good_reject;
+IPAddress local_IP(10,5,4,108);//249
+IPAddress gateway(10,5,4,1);//(10,5,0,30);
 IPAddress subnet(255,255,0,0);
-char* id_device ="QC-1"; //41
+char* id_device ="QC-3"; //41
 char* link = "GM1";
 String urlMode; 
 String urlID;
@@ -134,6 +134,18 @@ void bacadata(){
     display.setCursor(0, 54);
     display.print("BALANCE     :"); display.print(balance);
     }
+  if (finder.getString("Good Rework =","|",webtext,25) !=0){
+    good_rework = webtext;
+    Serial1.print("Good Rework = "); Serial1.println(good_rework);
+    display.setCursor(0, 54);
+    display.print("GOOD REWORK     :"); display.print(good_rework);
+    }
+  if (finder.getString("Good Reject =","|",webtext,25) !=0){
+    good_reject = webtext;
+    Serial1.print("Good Reject = "); Serial1.println(good_reject);
+    display.setCursor(0, 54);
+    display.print("GOOD REJECT     :"); display.print(good_reject);
+    }
    if(line == "TAP ID"){
     lcd.setCursor(0,0); lcd.print("TAP ID CARD ANDA");
     lcd.setCursor(4,1); lcd.print("QC AKHIR");
@@ -151,7 +163,7 @@ void tombol(String key){
   urlMode += key;
   urlMode += "&id_device=";
   urlMode += id_device;
-  urlMode += "&link=";
+  urlMode += "&link="; // tes
   urlMode += link;
   if (client.connect(host, port)) {
         client.print(String("GET ")+urlMode+" HTTP/1.1\r\n" +"Host: "+host+ "\r\n" +"Connection: close\r\n\r\n");
@@ -214,18 +226,22 @@ void decodeIR() // Indicate what key is pressed
       Serial1.println("Tombol 9 ditekan");
       tombol("9");
       break;
+    case 0xFF9867:
+      Serial1.println("Tombol 0 ditekan");
+      tombol("0");
+      break;
     case 0xFF38C7:
       Serial1.println("Tombol OK ditekan");
       tombol("OK");
       break;
-    case 0xFF6897:
+    case 0xFF6897: //*
       lcd.setCursor(0,0); lcd.print(" PROGRAM  RESET ");
       beep(500);
       Reset();
       break;
     case 0xFFB04F:
-      beep(500);
-      return setup();
+      Serial1.println("Tombol # ditekan");
+      tombol("OUT");
       break;
       default:
       beep(200);
